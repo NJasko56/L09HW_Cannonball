@@ -61,6 +61,26 @@ class Cannonball:
 
         return xs, ys
 
+class Crazyball(Cannonball):
+    def __init__(self, x):
+
+        super().__init__(x)
+
+    def move(self, sec, grav):
+
+        if self.getX() < 400:
+            grav = random.randrange(5,10)
+        
+        dx = self._vx * sec
+        dy = self._vy * sec
+
+        self._vy = self._vy - grav * sec
+
+        self._x = self._x + dx
+        self._y = self._y + dy
+
+    
+
 def run_app():
     st.title("Cannonball Trajectory")
 
@@ -76,6 +96,7 @@ def run_app():
 
     col1, col2 = st.columns(2)
     simulate = col1.button("Simulate")
+    crazySim = col2.button("Crazy Simulate")
 
     if simulate:
         angle_rad = radians(angle_deg)
@@ -98,6 +119,29 @@ def run_app():
             .properties(width=700, height=400)
         )
         st.altair_chart(chart, use_container_width=True)
+
+    if crazySim:
+        angle_rad = radians(angle_deg)
+        ball = Crazyball(0)
+        xs, ys = ball.shoot(angle_rad, velocity, gravity, step)
+
+        if not xs:
+            st.warning("No trajectory points were generated.")
+            return
+
+        df = pd.DataFrame({"x": xs, "y": ys})
+
+        chart = (
+            alt.Chart(df)
+            .mark_line()
+            .encode(
+                x=alt.X("x:Q", scale=alt.Scale(domain=[0, 300]), title="Distance (m)"),
+                y=alt.Y("y:Q", scale=alt.Scale(domain=[0, 100]), title="Height (m)")
+            )
+            .properties(width=700, height=400)
+        )
+        st.altair_chart(chart, use_container_width=True)
+
 
 
 if __name__ == "__main__":

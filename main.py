@@ -8,15 +8,56 @@ import random
 
 ## Represent a cannonball, tracking its position and velocity.
 #
+
+class Print_Iface:
+    def __init__(self, gravi):
+        self.gravi = gravi
+
+    def inter_(self, gravi, dat):
+        if(gravi > 4):
+            
+
+            chart = (
+                alt.Chart(dat)
+                .mark_line()
+            
+                .encode(
+                    x=alt.X("x:Q", scale=alt.Scale(domain=[0, 300]), title="Distance (m)"),
+                    y=alt.Y("y:Q", scale=alt.Scale(domain=[0, 100]), title="Height (m)")
+                
+                )
+                .properties(width=700, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+        elif(gravi < 4 ):
+            
+
+            chart = (
+                alt.Chart(dat)
+                .mark_line()
+            
+                .encode(
+                    x=alt.X("x:Q", scale=alt.Scale(domain=[0, 1200]), title="Distance (m)"),
+                    y=alt.Y("y:Q", scale=alt.Scale(domain=[0, 400]), title="Height (m)")
+                
+                )
+                .properties(width=700, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+
 class Cannonball:
     ## Create a new cannonball at the provided x position.
     #  @param x the x position of the ball
     #
-    def __init__(self, x):
+    def __init__(self, x, print_Iface):
         self._x = x
         self._y = 0
         self._vx = 0
         self._vy = 0
+        self.print_Iface = print_Iface
+
+    def inter_(self, grav, dat_):
+        return self.print_Iface.inter_(grav, dat_)
 
     ## Move the cannon ball, using its current velocities.
     #  @param sec the amount of time that has elapsed.
@@ -62,9 +103,10 @@ class Cannonball:
         return xs, ys
 
 class Crazyball(Cannonball):
-    def __init__(self, x):
+    def __init__(self, x, print_Iface):
 
-        super().__init__(x)
+
+        super().__init__(x, print_Iface)
 
     def move(self, sec, grav):
 
@@ -79,6 +121,9 @@ class Crazyball(Cannonball):
 
         self._x = self._x + dx
         self._y = self._y + dy
+
+    def inter_(self, grav, dat_):
+        return self.print_Iface.inter_(grav, dat_)
 
     
 
@@ -101,7 +146,8 @@ def run_app():
 
     if simulate:
         angle_rad = radians(angle_deg)
-        ball = Cannonball(0)
+        iface_ = Print_Iface(gravity)
+        ball = Cannonball(0, iface_)
         xs, ys = ball.shoot(angle_rad, velocity, gravity, step)
 
         if not xs:
@@ -109,23 +155,12 @@ def run_app():
             return
 
         df = pd.DataFrame({"x": xs, "y": ys})
-
-        chart = (
-            alt.Chart(df)
-            .mark_line()
-            
-            .encode(
-                x=alt.X("x:Q", scale=alt.Scale(domain=[0, 200]), title="Distance (m)"),
-                y=alt.Y("y:Q", scale=alt.Scale(domain=[0, 100]), title="Height (m)")
-                
-            )
-            .properties(width=700, height=400)
-        )
-        st.altair_chart(chart, use_container_width=True)
+        ball.inter_(gravity, df)
 
     if crazySim:
         angle_rad = radians(angle_deg)
-        ball = Crazyball(0)
+        iface_ = Print_Iface(gravity)
+        ball = Crazyball(0, iface_)
         xs, ys = ball.shoot(angle_rad, velocity, gravity, step)
 
         if not xs:
@@ -133,17 +168,7 @@ def run_app():
             return
 
         df = pd.DataFrame({"x": xs, "y": ys})
-
-        chart = (
-            alt.Chart(df)
-            .mark_line()
-            .encode(
-                x=alt.X("x:Q", scale=alt.Scale(domain=[0, 300]), title="Distance (m)"),
-                y=alt.Y("y:Q", scale=alt.Scale(domain=[0, 100]), title="Height (m)")
-            )
-            .properties(width=700, height=400)
-        )
-        st.altair_chart(chart, use_container_width=True)
+        ball.inter_(gravity, df)
 
 
 
